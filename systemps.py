@@ -30,8 +30,11 @@ def get_cpu_temps():
 
     out_raspi, err_raspi = exec_cmd(raspi_cpu)
 
-    print("out_raspi", out_raspi[0][:-3])
-
+    raspi_cpu_temp = {}
+    raspi_cpu_temp['name'] = "cpu"
+    raspi_cpu_temp["value"] = out_raspi[0][:-3]
+    raspi_cpu_temp["percise_value"] = out_raspi[0]
+    cpu_temps.append(json.dumps(raspi_cpu_temp))
     try:
         out, err = exec_cmd(cmd)
 
