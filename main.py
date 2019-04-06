@@ -1,16 +1,18 @@
 import subprocess, json
 
+
 def exec_cmd(cmd):
     p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     out, err = p.communicate()
     out = out.decode("utf-8", errors='ignore').split('\n')
     return out, err
 
+
 def get_cpu_temps():
     cpu_temps = []
     cmd = 'sensors | grep °C'
 
-    out, err  = exec_cmd(cmd)
+    out, err = exec_cmd(cmd)
 
     for temp in out:
         temp_dict = {}
@@ -40,8 +42,9 @@ def get_cpu_temps():
                 temp_dict["crit"] = temp_crit
             except ValueError:
                 pass
-        cpu_temps.append(temp_dict)
+            cpu_temps.append(temp_dict)
     return cpu_temps
+
 
 def get_device_temps():
     cmd = "fdisk -l | grep 'Disk /dev/sd'"
@@ -52,13 +55,21 @@ def get_device_temps():
         if len(device) > 0:
             device = device.split()
             device_data = {}
-            device_data['type'] = device[0]
             device_data['location'] = device[1]
-            out_hdtemp, err_hdtemp = exec_cmd("hddtemp " + device[1].replace(":", ""))
-            device_data["value"] = out_hdtemp[0].split(": ")[2]
+
+            out_hdtemp, err_hdtemp = exec_cmd(
+                "smartctl {} -a | grep Temperature_Celsius".format(device[1].replace(":", "")))
+
+            out_hdtemp = out_hdtemp[0].split()
+            device_data["value"] = out_hdtemp[9]
+            try:
+                device_data["minmax"] = out_hdtemp[11][:-1]
+            except Exception as e:
+                pass
 
             device_temp.append(device_data)
     return device_temp
+
 
 if __name__ == "__main__":
     cpu_temps = get_cpu_temps()
@@ -67,7 +78,6 @@ if __name__ == "__main__":
 
     for cpu_temp in cpu_temps:
         print(cpu_temp)
-
 
     for device in device_temps:
         print(device)
