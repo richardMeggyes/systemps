@@ -63,7 +63,7 @@ def get_cpu_temps():
     except Exception as e:
         pass
 
-    if not len(cpu_temps) == 0:
+    if len(cpu_temps) == 0:
         out_raspi, err_raspi = exec_cmd(raspi_cpu)
 
         raspi_cpu_temp = {}
