@@ -1,4 +1,4 @@
-import subprocess, json, sys
+import subprocess, json, sys, time
 
 
 def exec_cmd(cmd):
@@ -22,9 +22,15 @@ def get_fan_rpm():
             fans.append(json.dumps(fan_dict))
     return fans
 
+
 def get_cpu_temps():
+    raspi_cpu = "cat /sys/class/thermal/thermal_zone0/temps"
     cpu_temps = []
     cmd = 'sensors | grep °C'
+
+    out_raspi, err_raspi = exec_cmd(raspi_cpu)
+
+    print("out_raspi", out_raspi)
 
     try:
         out, err = exec_cmd(cmd)
@@ -100,9 +106,12 @@ def get_device_temps():
 
 
 if __name__ == "__main__":
-
+    tmp_dir = "/tmp/"
 
     args = sys.argv
+
+    if len(args) < 2:
+        args.append("-o")
 
     if args[1] == "-c" or args[1] == "--cpu":
         cpu_temps = get_cpu_temps()
@@ -115,6 +124,25 @@ if __name__ == "__main__":
     elif args[1] == "-d" or args[1] == "--device":
         device_temps = get_device_temps()
         print(device_temps)
+
+    elif args[1] == "-t":
+        while True:
+            temps_json = {}
+            temps_json['cpu'] = get_cpu_temps()
+            temps_json['device'] = get_device_temps()
+            temps_json['fan'] = get_fan_rpm()
+            temps_json = json.dumps(temps_json).replace("\\\"", "\"")
+            with open(tmp_dir + "systemps.txt", "w+") as f:
+                f.write(temps_json)
+            time.sleep(5)
+    elif args[1] == "-o":
+        temps_json = {}
+        temps_json['cpu'] = get_cpu_temps()
+        temps_json['device'] = get_device_temps()
+        temps_json['fan'] = get_fan_rpm()
+        temps_json = json.dumps(temps_json).replace("\\\"", "\"")
+        with open(tmp_dir + "systemps.txt", "w+") as f:
+            f.write(temps_json)
     elif args[1] == "-l" or args[1] == "--list":
         cpu_temps = get_cpu_temps()
         device_temps = get_device_temps()
