@@ -24,7 +24,7 @@ def get_fan_rpm():
 
 
 def get_cpu_temps():
-    raspi_cpu = "cat /sys/class/thermal/thermal_zone0/temps"
+    raspi_cpu = "cat /sys/class/thermal/thermal_zone0/temp"
     cpu_temps = []
     cmd = 'sensors | grep °C'
 
