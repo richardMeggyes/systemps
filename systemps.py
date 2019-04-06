@@ -28,13 +28,6 @@ def get_cpu_temps():
     cpu_temps = []
     cmd = 'sensors | grep °C'
 
-    out_raspi, err_raspi = exec_cmd(raspi_cpu)
-
-    raspi_cpu_temp = {}
-    raspi_cpu_temp['name'] = "cpu"
-    raspi_cpu_temp["value"] = out_raspi[0][:-3]
-    raspi_cpu_temp["percise_value"] = out_raspi[0]
-    cpu_temps.append(json.dumps(raspi_cpu_temp))
     try:
         out, err = exec_cmd(cmd)
 
@@ -69,6 +62,15 @@ def get_cpu_temps():
                 cpu_temps.append(json.dumps(temp_dict))
     except Exception as e:
         pass
+
+    if not len(cpu_temps) == 0:
+        out_raspi, err_raspi = exec_cmd(raspi_cpu)
+
+        raspi_cpu_temp = {}
+        raspi_cpu_temp['name'] = "cpu"
+        raspi_cpu_temp["value"] = out_raspi[0][:-3]
+        raspi_cpu_temp["percise_value"] = out_raspi[0]
+        cpu_temps.append(json.dumps(raspi_cpu_temp))
     return cpu_temps
 
 
