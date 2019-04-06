@@ -30,7 +30,7 @@ def get_cpu_temps():
 
     out_raspi, err_raspi = exec_cmd(raspi_cpu)
 
-    print("out_raspi", out_raspi)
+    print("out_raspi", out_raspi[0][:-3])
 
     try:
         out, err = exec_cmd(cmd)
