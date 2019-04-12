@@ -81,6 +81,8 @@ def get_device_temps():
 
     for device in out:
         if len(device) > 0:
+            failed = False
+
             device = device.split()
             device_data = {}
             device_data['location'] = device[1]
@@ -88,26 +90,40 @@ def get_device_temps():
             out_hdtemp, err_hdtemp = exec_cmd(
                 "smartctl {} -a | grep Temperature_Celsius".format(device[1].replace(":", "")))
 
-            out_hdtemp = out_hdtemp[0].split()
-            device_data["value"] = out_hdtemp[9]
+            try:
+                out_hdtemp = out_hdtemp[0].split()
+                device_data["value"] = out_hdtemp[9]
+            except Exception as e:
+                failed = True
 
             out_hdmodel, err_hdmodel = exec_cmd(
                 "smartctl {} -a | grep 'Device Model'".format(device[1].replace(":", "")))
             out_hdmodel = out_hdmodel[0].split(": ")
 
-            device_name = out_hdmodel[1]
-            while (device_name[0] == " "):
-                device_name = device_name[1:]
+            if not failed: device_name = out_hdmodel[1]
+            if not failed:
+                while (device_name[0] == " "):
+                    device_name = device_name[1:]
 
-            device_data["name"] = device_name
+                device_data["name"] = device_name
 
             try:
                 device_data["minmax"] = out_hdtemp[11][:-1]
             except Exception as e:
                 pass
 
-            device_temp.append(json.dumps(device_data))
+            if not failed: device_temp.append(json.dumps(device_data))
     return device_temp
+
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
 
 
 if __name__ == "__main__":
@@ -149,15 +165,17 @@ if __name__ == "__main__":
         with open(tmp_dir + "systemps.txt", "w+") as f:
             f.write(temps_json)
     elif args[1] == "-l" or args[1] == "--list":
-        cpu_temps = get_cpu_temps()
-        device_temps = get_device_temps()
-        fans = get_fan_rpm()
-        for cpu_temp in cpu_temps:
-            cpu_temp = json.loads(cpu_temp)
-            print(cpu_temp['name'], cpu_temp['value'])
-        for device in device_temps:
-            device = json.loads(device)
-            print(device['name'], device['location'], device['value'])
-        for fan in fans:
-            fan = json.loads(fan)
-            print(fan['name'], fan['rpm'])
+        while True:
+            cpu_temps = get_cpu_temps()
+            device_temps = get_device_temps()
+            fans = get_fan_rpm()
+            for cpu_temp in cpu_temps:
+                cpu_temp = json.loads(cpu_temp)
+                print(cpu_temp['name'], cpu_temp['value'])
+            for device in device_temps:
+                device = json.loads(device)
+                print(device['name'], device['location'], device['value'])
+            for fan in fans:
+                fan = json.loads(fan)
+                print(fan['name'], fan['rpm'])
+            time.sleep(1)
