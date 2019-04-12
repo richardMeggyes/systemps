@@ -170,14 +170,22 @@ if __name__ == "__main__":
             cpu_temps = get_cpu_temps()
             device_temps = get_device_temps()
             fans = get_fan_rpm()
+            line_to_print = []
+            line_to_print_counter = 0
             for cpu_temp in cpu_temps:
                 cpu_temp = json.loads(cpu_temp)
-                print(cpu_temp['name'], cpu_temp['value'])
+                line_to_print[line_to_print_counter] = cpu_temp['name'] + " " + cpu_temp['value']
+                line_to_print_counter += 1
             for device in device_temps:
                 device = json.loads(device)
-                print(device['name'], device['location'], device['value'])
+                line_to_print[line_to_print_counter] = device['name'] + " " + device['location'] + " " + device['value']
+                line_to_print_counter += 1
             for fan in fans:
                 fan = json.loads(fan)
-                print(fan['name'], fan['rpm'])
-            time.sleep(1)
+                line_to_print[line_to_print_counter] =fan['name'] + " " + fan['rpm']
+                line_to_print_counter += 1
+
             os.system('clear')
+            for line in line_to_print:
+                print(line)
+            time.sleep(1)
