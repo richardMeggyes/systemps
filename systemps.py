@@ -166,6 +166,7 @@ if __name__ == "__main__":
             f.write(temps_json)
     elif args[1] == "-l" or args[1] == "--list":
         while True:
+            print("clear")
             cpu_temps = get_cpu_temps()
             device_temps = get_device_temps()
             fans = get_fan_rpm()
